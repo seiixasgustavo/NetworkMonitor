@@ -9,10 +9,6 @@ if(EXISTS ${CMAKE_CURRENT_BINARY_DIR}/conaninfo.txt)
 endif()	
 find_package(Boost 1.74 REQUIRED COMPONENTS system)
 
-set(SOURCES 
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp"
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/websocket-client.cpp"  
-)
 set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
 
 IF( EXISTS "${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json" )
@@ -22,16 +18,36 @@ IF( EXISTS "${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json" )
   )
 ENDIF()
 
-add_executable(NetworkMonitor ${SOURCES})
+set(LIB_SOURCES
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/websocket-client.cpp"
+)
+add_library(NetworkMonitor STATIC ${LIB_SOURCES})
+
 target_compile_features(NetworkMonitor
-	PRIVATE
+	PUBLIC
 		cxx_std_14
 )
 target_link_libraries(NetworkMonitor
-	PRIVATE
+	PUBLIC
 		Boost::Boost
 )
 target_include_directories(NetworkMonitor
+  	PUBLIC
+		inc
+)
+
+
+set(TESTS_SOURCES
+  "${CMAKE_CURRENT_SOURCE_DIR}/tests/websocket-client.cpp"
+)
+add_executable(NetworkMonitorTests ${TESTS_SOURCES})
+
+target_compile_features(NetworkMonitorTests
+	PRIVATE
+      		cxx_std_14	
+)
+target_link_libraries(NetworkMonitorTests
   	PRIVATE
-  		src
+		NetworkMonitor
+		Boost::Boost
 )
