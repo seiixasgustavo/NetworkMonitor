@@ -7,7 +7,17 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 if(EXISTS ${CMAKE_CURRENT_BINARY_DIR}/conaninfo.txt)
 	list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_BINARY_DIR}")
 endif()	
-find_package(Boost 1.74 REQUIRED COMPONENTS system)
+
+# Packages --------
+
+find_package(Boost 1.74 REQUIRED COMPONENTS system unit_test_framework)
+find_package(OpenSSL REQUIRED)
+
+# Packages END ----
+
+enable_testing()
+
+# Enable Vim Autocomplete ------
 
 set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
 
@@ -17,6 +27,8 @@ IF( EXISTS "${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json" )
     ${CMAKE_CURRENT_SOURCE_DIR}/compile_commands.json
   )
 ENDIF()
+
+#Enable Vim Autocomplete END ---
 
 set(LIB_SOURCES
   "${CMAKE_CURRENT_SOURCE_DIR}/src/websocket-client.cpp"
@@ -30,14 +42,16 @@ target_compile_features(NetworkMonitor
 target_link_libraries(NetworkMonitor
 	PUBLIC
 		Boost::Boost
+		OpenSSL::OpenSSL
 )
 target_include_directories(NetworkMonitor
   	PUBLIC
 		inc
 )
 
-
+# Tests Configuration
 set(TESTS_SOURCES
+  "${CMAKE_CURRENT_SOURCE_DIR}/tests/main.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/tests/websocket-client.cpp"
 )
 add_executable(NetworkMonitorTests ${TESTS_SOURCES})
@@ -50,4 +64,14 @@ target_link_libraries(NetworkMonitorTests
   	PRIVATE
 		NetworkMonitor
 		Boost::Boost
+)
+
+
+add_test(
+  	NAME NetworkMonitorTests 
+  	COMMAND $<TARGET_FILE:NetworkMonitorTests>
+)
+
+set_tests_properties(NetworkMonitorTests PROPERTIES 
+  	PASS_REGULAR_EXPRESSION ".*No errors detected"
 )
