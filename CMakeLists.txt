@@ -37,7 +37,7 @@ add_library(NetworkMonitor STATIC ${LIB_SOURCES})
 
 target_compile_features(NetworkMonitor
 	PUBLIC
-		cxx_std_14
+		cxx_std_17
 )
 target_link_libraries(NetworkMonitor
 	PUBLIC
@@ -58,7 +58,11 @@ add_executable(NetworkMonitorTests ${TESTS_SOURCES})
 
 target_compile_features(NetworkMonitorTests
 	PRIVATE
-      		cxx_std_14	
+      		cxx_std_17	
+)
+target_compile_definitions(NetworkMonitorTests
+  	PRIVATE
+		TESTS_CACERT_PEM="${CMAKE_CURRENT_SOURCE_DIR}/tests/cacert.pem"
 )
 target_link_libraries(NetworkMonitorTests
   	PRIVATE
