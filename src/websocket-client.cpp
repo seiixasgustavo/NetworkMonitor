@@ -1,7 +1,11 @@
 #include <NetworkMonitor/websocket-client.h>
 
 #include <boost/asio.hpp>
+#include <boost/asio/execution_context.hpp>
+#include <boost/asio/ssl/stream_base.hpp>
+#include <boost/asio/strand.hpp>
 #include <boost/beast.hpp>
+#include <boost/beast/core/stream_traits.hpp>
 #include <boost/system/error_code.hpp>
 
 #include <openssl/ssl.h>
@@ -28,9 +32,10 @@ static void Log(const std::string &where, boost::system::error_code ec) {
 
 WebSocketClient::WebSocketClient(const std::string &url,
                                  const std::string &port,
-                                 boost::asio::io_context &ioc)
+                                 boost::asio::io_context &ioc,
+                                 boost::asio::ssl::context &ctx)
     : url_{url}, port_{port}, resolver_{boost::asio::make_strand(ioc)},
-      ws_{boost::asio::make_strand(ioc)} {}
+      ws_{boost::asio::make_strand(ioc), ctx} {}
 
 WebSocketClient::~WebSocketClient() = default;
 
@@ -78,9 +83,10 @@ void WebSocketClient::OnResolve(const boost::system::error_code &ec,
     return;
   }
 
-  ws_.next_layer().expires_after(std::chrono::seconds(5));
+  boost::beast::get_lowest_layer(ws_).expires_after(std::chrono::seconds(5));
 
-  ws_.next_layer().async_connect(*endpoint, [this](auto ec) { OnConnect(ec); });
+  boost::beast::get_lowest_layer(ws_).async_connect(
+      *endpoint, [this](auto ec) { OnConnect(ec); });
 }
 
 void WebSocketClient::OnConnect(const boost::system::error_code &ec) {
@@ -93,10 +99,15 @@ void WebSocketClient::OnConnect(const boost::system::error_code &ec) {
     return;
   }
 
-  ws_.next_layer().expires_never();
+  boost::beast::get_lowest_layer(ws_).expires_never();
   ws_.set_option(websocket::stream_base::timeout::suggested(
       boost::beast::role_type::client));
 
+  ws_.next_layer().async_handshake(boost::asio::ssl::stream_base::client,
+                                   [this](auto ec) { OnTlsHandshake(ec); });
+}
+
+void WebSocketClient::OnTlsHandshake(const boost::system::error_code &ec) {
   ws_.async_handshake(url_, "/", [this](auto ec) { OnHandshake(ec); });
 }
 

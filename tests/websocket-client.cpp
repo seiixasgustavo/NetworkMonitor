@@ -1,6 +1,7 @@
 #include <NetworkMonitor/websocket-client.h>
 
 #include <boost/asio.hpp>
+#include <boost/asio/ssl/context.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include <filesystem>
@@ -16,12 +17,15 @@ BOOST_AUTO_TEST_CASE(cacert_pem) {
 
 BOOST_AUTO_TEST_CASE(class_WebSocketClient) {
   const std::string url{"echo.wss-websocket.net"};
-  const std::string port{"80"};
+  const std::string port{"443"};
   const std::string message{"Hello WebSocket"};
+
+  boost::asio::ssl::context ctx{boost::asio::ssl::context::tlsv12_client};
+  ctx.load_verify_file(TESTS_CACERT_PEM);
 
   boost::asio::io_context ioc{};
 
-  WebSocketClient client{url, port, ioc};
+  WebSocketClient client{url, port, ioc, ctx};
 
   bool connected{false};
   bool messageSent{false};

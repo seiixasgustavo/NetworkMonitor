@@ -11,6 +11,7 @@ endif()
 # Packages --------
 
 find_package(Boost 1.74 REQUIRED COMPONENTS system unit_test_framework)
+find_package(Filesystem REQUIRED)
 find_package(OpenSSL REQUIRED)
 
 # Packages END ----
@@ -68,6 +69,8 @@ target_link_libraries(NetworkMonitorTests
   	PRIVATE
 		NetworkMonitor
 		Boost::Boost
+        	OpenSSL::OpenSSL
+        	std::filesystem
 )
 
 
