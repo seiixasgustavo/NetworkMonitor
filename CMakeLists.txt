@@ -11,14 +11,19 @@ endif()
 # Packages --------
 
 find_package(Boost 1.74 REQUIRED COMPONENTS system unit_test_framework)
+find_package(CURL REQUIRED)
 find_package(Filesystem REQUIRED)
 find_package(OpenSSL REQUIRED)
 
 # Packages END ----
 
+# Enable Testing -------
+
 enable_testing()
 
-# Enable Vim Autocomplete ------
+# Enable Testing END ---
+
+# Enable Vim Autocomplete -------
 
 set( CMAKE_EXPORT_COMPILE_COMMANDS ON )
 
@@ -29,7 +34,10 @@ IF( EXISTS "${CMAKE_CURRENT_BINARY_DIR}/compile_commands.json" )
   )
 ENDIF()
 
-#Enable Vim Autocomplete END ---
+# Enable Vim Autocomplete END ---
+
+
+# STATIC LIBRARY -------
 
 set(LIB_SOURCES
   "${CMAKE_CURRENT_SOURCE_DIR}/src/websocket-client.cpp"
@@ -44,11 +52,16 @@ target_link_libraries(NetworkMonitor
 	PUBLIC
 		Boost::Boost
 		OpenSSL::OpenSSL
+		std::filesystem
+	PRIVATE
+		CURL::CURL
 )
 target_include_directories(NetworkMonitor
   	PUBLIC
 		inc
 )
+
+# STATIC LIBRARY END ---
 
 # Tests Configuration
 set(TESTS_SOURCES
