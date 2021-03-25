@@ -15,6 +15,7 @@ namespace NetworkMonitor {
 class WebSocketClient {
 private:
   std::string url_{};
+  std::string endpoint_{};
   std::string port_{};
 
   boost::asio::ip::tcp::resolver resolver_;
@@ -43,8 +44,9 @@ private:
   void OnRead(const boost::system::error_code &ec, size_t nBytes);
 
 public:
-  WebSocketClient(const std::string &url, const std::string &port,
-                  boost::asio::io_context &ioc, boost::asio::ssl::context &ctx);
+  WebSocketClient(const std::string &url, const std::string &endpoint,
+                  const std::string &port, boost::asio::io_context &ioc,
+                  boost::asio::ssl::context &ctx);
 
   ~WebSocketClient();
 

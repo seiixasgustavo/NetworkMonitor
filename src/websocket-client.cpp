@@ -31,11 +31,14 @@ static void Log(const std::string &where, boost::system::error_code ec) {
 // Public Methods
 
 WebSocketClient::WebSocketClient(const std::string &url,
+                                 const std::string &endpoint,
                                  const std::string &port,
                                  boost::asio::io_context &ioc,
                                  boost::asio::ssl::context &ctx)
-    : url_{url}, port_{port}, resolver_{boost::asio::make_strand(ioc)},
-      ws_{boost::asio::make_strand(ioc), ctx} {}
+    : url_{url}, endpoint_{endpoint}, port_{port},
+      resolver_{boost::asio::make_strand(ioc)}, ws_{boost::asio::make_strand(
+                                                        ioc),
+                                                    ctx} {}
 
 WebSocketClient::~WebSocketClient() = default;
 
@@ -108,7 +111,7 @@ void WebSocketClient::OnConnect(const boost::system::error_code &ec) {
 }
 
 void WebSocketClient::OnTlsHandshake(const boost::system::error_code &ec) {
-  ws_.async_handshake(url_, "/", [this](auto ec) { OnHandshake(ec); });
+  ws_.async_handshake(url_, endpoint_, [this](auto ec) { OnHandshake(ec); });
 }
 
 void WebSocketClient::OnHandshake(const boost::system::error_code &ec) {

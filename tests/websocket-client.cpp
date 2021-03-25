@@ -17,15 +17,29 @@ BOOST_AUTO_TEST_CASE(cacert_pem) {
 
 BOOST_AUTO_TEST_CASE(class_WebSocketClient) {
   const std::string url{"echo.wss-websocket.net"};
+  const std::string endpoint{"/network-events"};
   const std::string port{"443"};
-  const std::string message{"Hello WebSocket"};
+
+  const std::string username{"fake_username"};
+  const std::string password{"fake_password"};
+
+  std::stringstream ss{};
+  ss << "STOMP" << std::endl
+     << "accept-version:1.2" << std::endl
+     << "host:transportforlondon.com" << std::endl
+     << "login:" << username << std::endl
+     << "passcode:" << password << std::endl
+     << std::endl
+     << '\0';
+
+  const std::string message{ss.str()};
 
   boost::asio::ssl::context ctx{boost::asio::ssl::context::tlsv12_client};
   ctx.load_verify_file(TESTS_CACERT_PEM);
 
   boost::asio::io_context ioc{};
 
-  WebSocketClient client{url, port, ioc, ctx};
+  WebSocketClient client{url, endpoint, port, ioc, ctx};
 
   bool connected{false};
   bool messageSent{false};
