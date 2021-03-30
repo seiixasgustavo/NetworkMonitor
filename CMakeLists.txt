@@ -40,6 +40,7 @@ ENDIF()
 # STATIC LIBRARY -------
 
 set(LIB_SOURCES
+  "${CMAKE_CURRENT_SOURCE_DIR}/src/transport-network.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/src/websocket-client.cpp"
 )
 add_library(NetworkMonitor STATIC ${LIB_SOURCES})
@@ -66,6 +67,7 @@ target_include_directories(NetworkMonitor
 # Tests Configuration
 set(TESTS_SOURCES
   "${CMAKE_CURRENT_SOURCE_DIR}/tests/main.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/tests/transport-network.cpp"
   "${CMAKE_CURRENT_SOURCE_DIR}/tests/websocket-client.cpp"
 )
 add_executable(NetworkMonitorTests ${TESTS_SOURCES})
