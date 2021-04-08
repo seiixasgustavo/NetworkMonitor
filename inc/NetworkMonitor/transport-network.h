@@ -2,6 +2,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <nlohmann/json.hpp>
 
 namespace NetworkMonitor
 {
@@ -80,6 +81,8 @@ namespace NetworkMonitor
 
         unsigned int GetTravelTime(const Id &line, const Id &route,
                                    const Id &stationA, const Id &stationB) const;
+
+        bool FromJson(nlohmann::json &&src);
 
     private:
         struct GraphNode;

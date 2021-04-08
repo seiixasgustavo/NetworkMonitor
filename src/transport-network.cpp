@@ -279,10 +279,65 @@ unsigned int TransportNetwork::GetTravelTime(
     return 0;
 }
 
+bool TransportNetwork::FromJson(nlohmann::json &&src)
+{
+    bool ok{true};
+
+    for (auto &&stationJson : src.at("stations"))
+    {
+        Station station{
+            std::move(stationJson.at("station_id").get<std::string>()),
+            std::move(stationJson.at("name").get<std::string>()),
+        };
+
+        ok &= AddStation(station);
+        if (!ok)
+        {
+            throw std::runtime_error("Could not add station: " + station.id);
+        }
+    }
+
+    for (auto &&lineJson : src.at("lines"))
+    {
+        Line line{
+            std::move(lineJson.at("line_id").get<std::string>()),
+            std::move(lineJson.at("name").get<std::string>()),
+            {},
+        };
+        line.routes.reserve(lineJson.at("routes").size());
+        for (auto &&routeJson : lineJson.at("routes"))
+        {
+            line.routes.emplace_back(Route{
+                std::move(routeJson.at("route_id").get<std::string>()),
+                std::move(routeJson.at("direction").get<std::string>()),
+                std::move(routeJson.at("line_id").get<std::string>()),
+                std::move(routeJson.at("start_station_id").get<std::string>()),
+                std::move(routeJson.at("end_station_id").get<std::string>()),
+                std::move(routeJson.at("route_stops").get<std::vector<std::string>>()),
+            });
+        }
+        ok &= AddLine(line);
+
+        if (!ok)
+        {
+            throw std::runtime_error("Could not add line: " + line.id);
+        }
+    }
+
+    for (auto &&travelTimeJson : src.at("travel_times"))
+    {
+        ok &= SetTravelTime(
+            travelTimeJson.at("start_station_id").get<std::string>(),
+            travelTimeJson.at("end_station_id").get<std::string>(),
+            travelTimeJson.at("travel_time").get<unsigned int>());
+    }
+
+    return ok;
+}
+
 // TransportNetwork — Private methods
 
-std::vector<
-    std::shared_ptr<TransportNetwork::GraphEdge>>::const_iterator
+std::vector<std::shared_ptr<TransportNetwork::GraphEdge>>::const_iterator
 TransportNetwork::GraphNode::FindEdgeForRoute(
     const std::shared_ptr<RouteInternal> &route) const
 {
